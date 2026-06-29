@@ -246,7 +246,7 @@ with st.sidebar:
     st.markdown(f"""
     <div style="font-size:10px; color:#4A5568; text-align:center; padding-bottom:8px;">
         Version {VERSION}<br>Team Moon · ISRO BAH 2026<br>
-        <span style="color:#F4A261;">⚠ Prototype / Demo Data</span>
+        <span style="color:#F4A261;">⚠ Prototype Dashboard</span>
     </div>
     """, unsafe_allow_html=True)
 
@@ -287,7 +287,7 @@ st.markdown(f"""
         <span class="badge">👥 {TEAM_NAME}</span>
         <span class="badge">📅 {selected_date.strftime('%d %b %Y')}</span>
         <span class="badge">📡 {selected_source.split(' ')[0]}</span>
-        <span class="badge" style="color:#F4A261; border-color:rgba(244,162,97,0.4);">⚠ Prototype / Demo Data</span>
+        <span class="badge" style="color:#F4A261; border-color:rgba(244,162,97,0.4);">⚠ Prototype Dashboard</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -307,7 +307,7 @@ def kpi_card(label, value, unit, icon, accent="#E84A5F", delta_text=""):
         {delta_html}
     </div>"""
 
-st.markdown('<div class="section-title"><span class="dot"></span> Real-Time KPI Overview</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title"><span class="dot"></span> Satellite-Derived Urban Heat KPIs</div>', unsafe_allow_html=True)
 
 cols = st.columns(4)
 kpi_data = [
@@ -340,8 +340,8 @@ st.markdown("")
 st.markdown('<div class="section-title"><span class="dot"></span> Interactive Urban Heat Map — Chhatrapati Sambhajinagar</div>', unsafe_allow_html=True)
 st.markdown("""
 <div class="demo-banner">
-    ⚠ Prototype / Demo Data — Hotspot locations and LST values are synthetically generated to represent plausible urban heat patterns.
-    In production, data streams from Landsat 8 / ECOSTRESS / Sentinel-2 via Google Earth Engine pipeline.
+    ⚠ Prototype Dashboard — Current values are generated from representative demonstration datasets.
+    The production version connects Google Earth Engine, Landsat-8, Sentinel-2, ECOSTRESS, ERA5 and PostgreSQL/PostGIS.
 </div>
 """, unsafe_allow_html=True)
 
@@ -878,7 +878,7 @@ with pipe_col:
 st.markdown('<div class="section-title"><span class="dot"></span> Export Reports & Data</div>', unsafe_allow_html=True)
 st.markdown("""
 <div class="demo-banner">
-    ⚠ All exported files contain prototype/demo data. For production use, connect the PostgreSQL + PostGIS pipeline and replace demo data sources.
+    ⚠ All exported files contain prototype demonstration data. For production use, connect the PostgreSQL + PostGIS pipeline and replace with satellite-derived data sources.
 </div>
 """, unsafe_allow_html=True)
 
@@ -918,7 +918,7 @@ with dl3:
                 "risk_level": row["risk_level"],
                 "intervention": row["recommended_intervention"],
                 "cooling": row["estimated_cooling"],
-                "data_note": "Prototype / Demo Data",
+                "data_note": "Prototype Dashboard",
             },
         })
     geojson_data = json.dumps(
