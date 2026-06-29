@@ -58,21 +58,21 @@ This dashboard integrates **satellite remote sensing**, **AI/ML prediction**, an
 ## Architecture
 
 ```
-Satellite Data (Landsat 8 / Sentinel-2 / ECOSTRESS / ERA5)
+Satellite Data Acquisition (Landsat 8 / Sentinel-2 / ECOSTRESS / ERA5 Reanalysis)
         ↓
-Google Earth Engine — Band extraction · LST · NDVI · Albedo
+Google Earth Engine API — Band extraction · LST retrieval · NDVI computation · Albedo calculation
         ↓
-Data Cleaning + Spatial Processing (GeoPandas · Rasterio)
+Spatial Data Processing — Geometric correction · Reprojection · Feature engineering · Quality control
         ↓
-PostgreSQL + PostGIS — Spatial database + feature store
+PostgreSQL + PostGIS Spatial Database — Spatial indexing · Raster data management · Geospatial queries
         ↓
-Random Forest AI Model — LST prediction + feature importance
+Random Forest Regressor — LST prediction · Feature importance analysis · Cross-validation
         ↓
-Mitigation Recommendation Engine — Zone scoring + strategy ranking
+Mitigation Recommendation Engine — Zone scoring algorithm · Strategy ranking · Impact quantification
         ↓
-Streamlit Dashboard — Interactive maps · KPI cards · Reports
+Streamlit Geospatial Dashboard — Interactive web mapping · KPI visualization · Data export
         ↓
-City Planners / Smart City Authorities — Decision support
+Urban Planning Decision Support System — Evidence-based heat mitigation planning
 ```
 
 ---
@@ -156,27 +156,27 @@ python models/train_model.py --model rf --output models/random_forest_model.pkl
 
 ## Demo Data Note
 
-> ⚠️ **All data displayed in this MVP is synthetic prototype/demo data** generated to represent plausible urban heat patterns for Chhatrapati Sambhajinagar, Maharashtra.
+> ⚠️ **All data displayed in this MVP is synthetic prototype demonstration data** generated to represent plausible urban heat patterns for Chhatrapati Sambhajinagar, Maharashtra.
 >
-> In a production deployment, the pipeline ingests real satellite data from:
-> - **Landsat 8** (LST, albedo) via USGS EarthExplorer / Google Earth Engine
-> - **Sentinel-2** (NDVI, LULC) via ESA Copernicus
-> - **ECOSTRESS** (high-resolution LST) via NASA JPL
-> - **ERA5** (humidity, wind speed) via ECMWF
-> - **CPCB AQI** via open API
-> - **OpenStreetMap** (building footprints, road networks)
+> In a production deployment, the pipeline ingests real satellite-derived data from:
+> - **Landsat 8** (Land Surface Temperature, surface albedo) via USGS EarthExplorer / Google Earth Engine API
+> - **Sentinel-2** (NDVI, Land Use/Land Cover) via ESA Copernicus Open Access Hub
+> - **ECOSTRESS** (high-resolution LST) via NASA JPL / ECOsystem Spaceborne Thermal Radiometer Experiment
+> - **ERA5** (humidity, wind speed, meteorological reanalysis) via ECMWF Climate Data Store
+> - **CPCB AQI** (Air Quality Index) via Central Pollution Control Board Open Data
+> - **OpenStreetMap** (building footprints, road networks, administrative boundaries) via OSM API
 
 ---
 
 ## Future Scope
 
-- [ ] Real-time satellite data integration via Google Earth Engine API
-- [ ] Ward-level administrative boundary overlays (OpenStreetMap + Census India)
+- [ ] Satellite-derived data integration via Google Earth Engine API for real-time LST monitoring
+- [ ] Ward-level administrative boundary overlays (OpenStreetMap + Census India administrative data)
 - [ ] Multi-city expansion: Pune, Nagpur, Mumbai, Nashik
-- [ ] Deep learning models: CNN on raster tiles for spatial LST prediction
-- [ ] Digital Twin integration for scenario planning
+- [ ] Deep learning models: Convolutional Neural Networks (CNN) on raster tiles for spatial LST prediction
+- [ ] Digital Twin integration for urban climate scenario planning
 - [ ] Mobile-optimized citizen heat-risk interface
-- [ ] Integration with Smart City Command & Control Centre
+- [ ] Integration with Smart City Command & Control Centre for operational decision support
 
 ---
 

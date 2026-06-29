@@ -10,9 +10,8 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from streamlit_folium import st_folium
-import io
 import json
-from datetime import date, datetime
+from datetime import date
 
 # ── Project imports ───────────────────────────────────────────────────────────
 from config import (
@@ -219,8 +218,8 @@ with st.sidebar:
         index=0,
     )
     selected_date = st.date_input(
-        "Analysis Date",
-        value=date(2025, 5, 15),
+        "Latest Available Satellite Observation",
+        value=date.today(),
         min_value=date(2023, 1, 1),
         max_value=date.today(),
     )
@@ -285,7 +284,7 @@ st.markdown(f"""
         <span class="badge badge-accent">🌡 Pilot: {PILOT_CITY}</span>
         <span class="badge badge-green">🚀 {HACKATHON_NAME}</span>
         <span class="badge">👥 {TEAM_NAME}</span>
-        <span class="badge">📅 {selected_date.strftime('%d %b %Y')}</span>
+        <span class="badge">📅 Observation Date</span>
         <span class="badge">📡 {selected_source.split(' ')[0]}</span>
         <span class="badge" style="color:#F4A261; border-color:rgba(244,162,97,0.4);">⚠ Prototype Dashboard</span>
     </div>
@@ -312,7 +311,7 @@ st.markdown('<div class="section-title"><span class="dot"></span> Satellite-Deri
 cols = st.columns(4)
 kpi_data = [
     ("Avg Land Surface Temp",   f"{kpi['avg_lst']}", "°C", "🌡️", "#E84A5F", "▲ +2.4°C vs 5yr avg"),
-    ("Mean Surface Albedo",     f"{kpi['mean_albedo']:.3f}", "reflectivity", "#F4A261", "#F4A261", "▼ Low — mitigation needed"),
+    ("Mean Surface Albedo",     f"{kpi['mean_albedo']:.3f}", "unitless", "#F4A261", "#F4A261", "▼ Low — mitigation needed"),
     ("Tree Cover Density",      f"{kpi['tree_cover']}", "%", "🌳", "#2A9D8F", "▼ Below 30% benchmark"),
     ("Building Density",        f"{kpi['building_density']}", "%", "🏙️", "#9F7AEA", "High density zones"),
 ]
@@ -325,13 +324,11 @@ kpi_data2 = [
     ("Heat Hotspot Zones",      f"{kpi['hotspot_count']}", "active zones", "🔴", "#E84A5F", f"⚠ {int(kpi['hotspot_count']*0.35)} critical"),
     ("Relative Humidity",       f"{kpi['humidity']}", "%", "💧", "#63B3ED", "Low — exacerbates heat"),
     ("Wind Speed",              f"{kpi['wind_speed']}", "m/s", "🌬️", "#81E6D9", "Moderate ventilation"),
-    ("Urban Heat Risk Index",   f"{kpi['risk_index']}", "/ 10", "⚡", "#FC8181", "HIGH — immediate action"),
+    ("Urban Heat Risk Index",   f"{kpi['risk_index']:.1f}", "index (0-10)", "⚡", "#FC8181", "HIGH — immediate action"),
 ]
 for i, (label, val, unit, icon, accent, delta) in enumerate(kpi_data2):
     with cols2[i]:
         st.markdown(kpi_card(label, val, unit, icon, accent, delta), unsafe_allow_html=True)
-
-st.markdown("")
 
 
 # =============================================================================
@@ -382,8 +379,6 @@ with info_col:
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-st.markdown("")
-
 
 # =============================================================================
 # ── SECTION 4: AI/ML PREDICTION ──────────────────────────────────────────────
@@ -421,7 +416,7 @@ with pred_col:
         name="Perfect Prediction", showlegend=True,
     ))
     fig_scatter.update_layout(
-        title=dict(text="Actual vs Predicted LST (Test Set)", font=dict(size=13, color="#CBD5E0")),
+        title=dict(text="Random Forest Model Validation: Actual vs Predicted LST", font=dict(size=13, color="#CBD5E0")),
         xaxis=dict(title="Actual LST (°C)", color="#718096", gridcolor="#2D3748"),
         yaxis=dict(title="Predicted LST (°C)", color="#718096", gridcolor="#2D3748"),
         paper_bgcolor="#161C2D", plot_bgcolor="#161C2D",
@@ -449,7 +444,7 @@ with metric_col:
             <span style="color:{color}; font-weight:600;">{val}</span>
         </div>""", unsafe_allow_html=True)
 
-    st.markdown("<br>**Mitigation Impact**")
+    st.markdown("**Mitigation Impact**")
     for label, val, color in [
         ("Current Avg LST",   f"{avg_before:.2f} °C", "#E84A5F"),
         ("Post-Mitigation",   f"{avg_after:.2f} °C",  "#2A9D8F"),
@@ -490,7 +485,7 @@ with fi_col:
         hovertemplate="%{y}: %{x:.4f}<extra></extra>",
     ))
     fig_fi.update_layout(
-        title=dict(text="Feature Importance Scores", font=dict(size=13, color="#CBD5E0")),
+        title=dict(text="Random Forest Feature Importance Analysis", font=dict(size=13, color="#CBD5E0")),
         xaxis=dict(title="Importance", color="#718096", gridcolor="#2D3748"),
         yaxis=dict(color="#A0AEC0", tickfont=dict(size=11)),
         paper_bgcolor="#161C2D", plot_bgcolor="#161C2D",
@@ -510,7 +505,7 @@ with driver_col:
         },
         size="building_density", size_max=18,
         labels={"building_density": "Building Density (%)", "lst": "LST (°C)"},
-        title="Building Density vs LST",
+        title="Building Density Correlation with Land Surface Temperature",
         hover_data=["zone", "zone_type"],
     )
     fig_bd.update_layout(
@@ -575,21 +570,21 @@ def _scatter_with_trendline(df, x_col, y_col, title, x_label, y_label):
 with d1:
     fig1 = _scatter_with_trendline(
         hotspot_filtered, "albedo", "lst",
-        "Albedo vs LST", "Surface Albedo", "LST (°C)"
+        "Surface Albedo Correlation with LST", "Surface Albedo (unitless)", "Land Surface Temperature (°C)"
     )
     st.plotly_chart(fig1, use_container_width=True)
 
 with d2:
     fig2 = _scatter_with_trendline(
         hotspot_filtered, "ndvi", "lst",
-        "NDVI vs LST", "NDVI", "LST (°C)"
+        "NDVI Correlation with LST", "Normalized Difference Vegetation Index", "Land Surface Temperature (°C)"
     )
     st.plotly_chart(fig2, use_container_width=True)
 
 with d3:
     fig3 = _scatter_with_trendline(
         hotspot_filtered, "tree_cover", "lst",
-        "Tree Cover vs LST", "Tree Cover (%)", "LST (°C)"
+        "Tree Cover Correlation with LST", "Tree Cover Density (%)", "Land Surface Temperature (°C)"
     )
     st.plotly_chart(fig3, use_container_width=True)
 
@@ -620,7 +615,7 @@ fig_ts.add_hline(
     annotation_font_color="#F4A261",
 )
 fig_ts.update_layout(
-    title=dict(text="Monthly Average LST Trend — 2024 (Prototype Data)", font=dict(size=13, color="#CBD5E0")),
+    title=dict(text="Monthly Average LST Trend — Satellite-Derived Time Series (Prototype Data)", font=dict(size=13, color="#CBD5E0")),
     xaxis=dict(color="#718096", gridcolor="#2D3748"),
     yaxis=dict(title="Avg LST (°C)", color="#718096", gridcolor="#2D3748"),
     paper_bgcolor="#161C2D", plot_bgcolor="#161C2D",
@@ -663,8 +658,8 @@ for i, (label, val, unit, accent) in enumerate(impact_kpis):
 imp_cols2 = st.columns(3)
 impact_kpis2 = [
     ("People Benefited",       f"{impact['people_benefited']:,}",  "residents",         "#63B3ED"),
-    ("Energy Saving (est.)",   f"{impact['energy_saving_MWh']:,.0f}", "MWh / year",     "#F6E05E"),
-    ("CO₂ Reduction (est.)",   f"{impact['co2_reduction_tons']:,.0f}", "tonnes CO₂/yr", "#81E6D9"),
+    ("Energy Saving (est.)",   f"{impact['energy_saving_MWh']:,.0f}", "MWh/year",     "#F6E05E"),
+    ("CO₂ Reduction (est.)",   f"{impact['co2_reduction_tons']:,.0f}", "tonnes CO₂/year", "#81E6D9"),
 ]
 for i, (label, val, unit, accent) in enumerate(impact_kpis2):
     with imp_cols2[i]:
@@ -708,7 +703,7 @@ with ba_col2:
     fig_reduc = px.histogram(
         predicted_df, x="lst_reduction",
         nbins=14,
-        title="Distribution of Estimated LST Reduction",
+        title="Probability Distribution of LST Reduction by Mitigation",
         labels={"lst_reduction": "LST Reduction (°C)", "count": "Zones"},
         color_discrete_sequence=["#2A9D8F"],
     )
@@ -808,14 +803,14 @@ arch_col, pipe_col = st.columns([1, 1])
 
 with arch_col:
     arch_nodes = [
-        ("🛰️ Satellite Data", "Landsat 8 · Sentinel-2 · ECOSTRESS · ERA5"),
-        ("🌍 Google Earth Engine", "Band extraction · LST · NDVI · Albedo"),
-        ("🧹 Data Cleaning & Processing", "Spatial joins · Reprojection · Feature engineering"),
-        ("🗄️ PostgreSQL + PostGIS", "Spatial database · Raster storage · Query engine"),
-        ("🤖 Random Forest AI Model", "LST prediction · Feature importance · Cross-validation"),
-        ("💡 Mitigation Recommendation Engine", "Zone scoring · Strategy ranking · Impact estimation"),
-        ("📊 Streamlit Dashboard", "Interactive maps · KPI cards · Download reports"),
-        ("🏛️ City Planners / Authorities", "Decision support · Action planning · Monitoring"),
+        ("🛰️ Satellite Data Acquisition", "Landsat 8 · Sentinel-2 · ECOSTRESS · ERA5 Reanalysis"),
+        ("🌍 Google Earth Engine Processing", "Band extraction · LST retrieval · NDVI computation · Albedo calculation"),
+        ("🧹 Spatial Data Processing", "Geometric correction · Reprojection · Feature engineering · Quality control"),
+        ("🗄️ PostgreSQL + PostGIS Storage", "Spatial database · Raster data management · Spatial indexing"),
+        ("🤖 Machine Learning Model", "Random Forest regression · LST prediction · Feature importance analysis · Cross-validation"),
+        ("💡 Mitigation Recommendation Engine", "Zone scoring algorithm · Strategy ranking · Impact quantification"),
+        ("📊 Geospatial Dashboard", "Interactive web mapping · KPI visualization · Data export capabilities"),
+        ("🏛️ Decision Support System", "Urban planning interface · Action planning · Monitoring dashboard"),
     ]
     flow_html = '<div class="arch-flow">'
     for i, (node, sub) in enumerate(arch_nodes):
@@ -834,19 +829,19 @@ with pipe_col:
     <div class="section-card">
     <div style="font-size:13px; color:#CBD5E0; font-weight:600; margin-bottom:12px;">Data Pipeline Explanation</div>
     <div style="font-size:12px; color:#A0AEC0; line-height:1.7;">
-    Satellite and environmental datasets are ingested via <b style="color:#CBD5E0;">Google Earth Engine</b>
+    Satellite and environmental datasets are ingested via <b style="color:#CBD5E0;">Google Earth Engine API</b>
     to extract key biophysical variables: Land Surface Temperature (LST), surface albedo,
     Normalized Difference Vegetation Index (NDVI), building and road density, and ERA5
     meteorological reanalysis fields.<br><br>
-    These features are stored in a <b style="color:#CBD5E0;">PostgreSQL + PostGIS</b> spatial database
-    that enables efficient geo-queries by ward, buffer zone, or administrative boundary.<br><br>
+    These features are stored in a <b style="color:#CBD5E0;">PostgreSQL + PostGIS spatial database</b>
+    that enables efficient geospatial queries by administrative boundary, buffer zone, or spatial index.<br><br>
     A <b style="color:#CBD5E0;">Random Forest Regressor</b> trained on this feature set predicts LST
-    for any zone under both current and simulated mitigation conditions. Feature importance
+    for any zone under both current conditions and simulated mitigation scenarios. Feature importance
     analysis reveals the dominant heat drivers, and the <b style="color:#CBD5E0;">Mitigation
-    Recommendation Engine</b> ranks interventions by estimated cooling potential, feasibility,
+    Recommendation Engine</b> ranks interventions by estimated cooling potential, implementation feasibility,
     and priority score.<br><br>
-    All outputs are served through this <b style="color:#CBD5E0;">Streamlit dashboard</b>
-    enabling city planners to make evidence-based decisions.
+    All outputs are served through this <b style="color:#CBD5E0;">Streamlit geospatial dashboard</b>
+    enabling urban planners to make evidence-based decisions for heat mitigation.
     </div>
     </div>
     <div class="section-card" style="margin-top:12px;">
@@ -943,7 +938,7 @@ with dl4:
         "avg_lst_before": impact["avg_lst_before"],
         "avg_lst_after":  impact["avg_lst_after"],
         "total_cooling":  impact["total_cooling"],
-        "data_note":      "Prototype / Demo Data",
+        "data_note":      "Prototype Dashboard",
     }
     metrics_df = pd.DataFrame([metrics_export])
     st.download_button(
@@ -963,7 +958,7 @@ st.markdown(f"""
 <div style="text-align:center; padding: 16px 0; font-size:11px; color:#4A5568; font-family:'Inter',sans-serif;">
     <b style="color:#718096;">{PROJECT_TITLE}</b> &nbsp;·&nbsp;
     {TEAM_NAME} &nbsp;·&nbsp; {HACKATHON_NAME} &nbsp;·&nbsp; Version {VERSION}<br>
-    <span style="color:#F4A261;">⚠ All data shown is prototype/demo data for hackathon evaluation purposes only.</span><br>
+    <span style="color:#F4A261;">⚠ All data shown is prototype demonstration data for hackathon evaluation purposes only.</span><br>
     Data Sources Referenced: Landsat 8 (USGS/NASA) · Sentinel-2 (ESA) · ECOSTRESS (NASA/JPL) · ERA5 (ECMWF) · CPCB · OpenStreetMap
 </div>
 """, unsafe_allow_html=True)

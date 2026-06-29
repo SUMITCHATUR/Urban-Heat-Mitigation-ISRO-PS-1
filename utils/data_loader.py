@@ -55,6 +55,7 @@ def load_hotspot_data() -> pd.DataFrame:
         else:         return "Low"
 
     def mitigation(row):
+        """Generate mitigation recommendations based on primary heat drivers."""
         drivers = []
         if row["building_density"] > 55: drivers.append("Cool Roofs")
         if row["ndvi"] < 0.15:           drivers.append("Tree Plantation")
@@ -64,6 +65,7 @@ def load_hotspot_data() -> pd.DataFrame:
         return " + ".join(drivers[:2])
 
     def driver(row):
+        """Identify primary heat driver based on environmental thresholds."""
         if row["building_density"] > 55: return "High Building Density"
         if row["ndvi"] < 0.15:           return "Low Vegetation (NDVI)"
         if row["albedo"] < 0.12:         return "Low Surface Albedo"
